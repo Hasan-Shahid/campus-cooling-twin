@@ -144,16 +144,40 @@ def inject_css():
 
         html, body, [class*="css"] {{ font-family: 'JetBrains Mono', ui-monospace, monospace; }}
 
-        /* page backdrop: deep void + faint HUD grid + top glow */
-        .stApp {{
-            background:
-                radial-gradient(ellipse 80% 45% at 50% -10%, rgba(57,135,229,0.14), transparent 60%),
-                repeating-linear-gradient(0deg, rgba(57,135,229,0.04) 0px, rgba(57,135,229,0.04) 1px, transparent 1px, transparent 34px),
-                repeating-linear-gradient(90deg, rgba(57,135,229,0.04) 0px, rgba(57,135,229,0.04) 1px, transparent 1px, transparent 34px),
-                {VOID_BG};
-            background-attachment: fixed;
+        /* page backdrop: animated futuristic scene (.bgfx, injected by inject_background) behind transparent chrome */
+        .stApp {{ background: {VOID_BG}; }}
+        [data-testid="stAppViewContainer"], [data-testid="stMain"], [data-testid="stMainBlockContainer"] {{ background: transparent; position: relative; z-index: 1; }}
+        [data-testid="stHeader"] {{ background: rgba(5,7,10,0.0); border-bottom: 1px solid {BORDER_GLOW}; z-index: 2; }}
+        [data-testid="stSidebar"] {{ z-index: 2; }}
+
+        .bgfx {{ position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+            --glowA: rgba(51,225,255,.18); --glowB: rgba(140,90,255,.20); --gridline: rgba(51,225,255,.38);
+            --trace: rgba(51,225,255,.16); --scan: rgba(51,225,255,.07); --horizon: rgba(51,225,255,.8); --floor: #070a10;
+            --neon: #33e1ff;
+            background: radial-gradient(70% 50% at 20% 0%, var(--glowA), transparent 70%),
+                        radial-gradient(60% 45% at 90% 15%, var(--glowB), transparent 70%), {VOID_BG}; }}
+        .bgfx .floor {{ position: absolute; left: -50%; right: -50%; bottom: -10%; height: 55%;
+            background: linear-gradient(180deg, transparent, var(--floor) 85%),
+                        linear-gradient(var(--gridline) 1.5px, transparent 1.5px) 0 0/60px 60px,
+                        linear-gradient(90deg, var(--gridline) 1.5px, transparent 1.5px) 0 0/60px 60px;
+            transform: perspective(420px) rotateX(62deg); transform-origin: 50% 0; animation: bgfx-floor 4s linear infinite;
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%); mask-image: linear-gradient(180deg, transparent 0%, #000 30%); }}
+        @keyframes bgfx-floor {{ to {{ background-position: 0 0, 0 60px, 0 0; }} }}
+        .bgfx .horizon {{ position: absolute; left: 0; right: 0; bottom: 45%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--horizon), transparent); box-shadow: 0 0 18px 4px var(--glowA); }}
+        .bgfx .scan {{ position: absolute; left: 0; right: 0; height: 140px; top: -140px;
+            background: linear-gradient(180deg, transparent, var(--scan), transparent); animation: bgfx-scan 9s linear infinite; }}
+        @keyframes bgfx-scan {{ to {{ transform: translateY(calc(100vh + 140px)); }} }}
+        .bgfx .mote {{ position: absolute; bottom: -10px; width: 3px; height: 3px; border-radius: 50%;
+            background: var(--neon); box-shadow: 0 0 6px var(--neon); opacity: .7; animation: bgfx-mote linear infinite; }}
+        @keyframes bgfx-mote {{ to {{ transform: translateY(-105vh); opacity: 0; }} }}
+        .bgfx .ring-hud {{ position: absolute; width: 520px; height: 520px; right: -180px; top: -160px; border-radius: 50%;
+            border: 1px dashed var(--trace); outline: 1px solid var(--trace); outline-offset: -42px; animation: bgfx-spin 60s linear infinite; }}
+        @keyframes bgfx-spin {{ to {{ transform: rotate(360deg); }} }}
+        @media (prefers-reduced-motion: reduce) {{
+            .bgfx .floor, .bgfx .scan, .bgfx .mote, .bgfx .ring-hud {{ animation: none; }}
+            .bgfx .scan, .bgfx .mote {{ display: none; }}
         }}
-        [data-testid="stHeader"] {{ background: rgba(5,7,10,0.0); border-bottom: 1px solid {BORDER_GLOW}; }}
 
         h1, h2, h3 {{ font-family: 'Rajdhani', system-ui, sans-serif; letter-spacing: 0.03em; text-transform: uppercase; font-weight: 700; }}
         h1 {{
@@ -211,6 +235,21 @@ def inject_css():
     )
 
 
+def inject_background():
+    """Animated backdrop markup (styles live in inject_css). Motes use fixed pseudo-random
+    positions/durations so the scene is identical on every rerun."""
+    motes = "".join(
+        f'<i class="mote" style="left:{(i * 37 + 11) % 100}%;animation-duration:{9 + (i * 5) % 10}s;'
+        f'animation-delay:-{(i * 3) % 13}s"></i>'
+        for i in range(14)
+    )
+    st.markdown(
+        f'<div class="bgfx"><div class="floor"></div><div class="horizon"></div><div class="scan"></div>'
+        f'<div class="ring-hud"></div>{motes}</div>',
+        unsafe_allow_html=True,
+    )
+
+
 def base_layout(fig, title, yaxis_title, height=360):
     fig.update_layout(
         title=dict(text=title, font=dict(color=INK_PRIMARY_DARK, size=15, family="Rajdhani, sans-serif")),
@@ -227,6 +266,7 @@ def base_layout(fig, title, yaxis_title, height=360):
 
 
 inject_css()
+inject_background()
 st.title("◆ PLEIADES DIGITAL TWIN // BLOCK B")
 st.caption(
     f"PLEIAData (Zenodo 7620136), Block B, {WINDOW_START} to {WINDOW_END} -- **real sensor data**, not synthetic. "
