@@ -1,0 +1,11 @@
+# Runtime dependencies for the Streamlit app (what Streamlit Community Cloud installs).
+# xgboost/scikit-learn are pinned to the versions that trained the pickled models in
+# data/processed/models/*.joblib -- loading them under a different version can fail or warn.
+streamlit==1.64.0
+pandas==3.0.6
+numpy==2.5.3
+pyarrow==25.0.1
+plotly==7.1.0
+joblib==1.6.0
+scikit-learn==1.9.1
+xgboost==3.4.1

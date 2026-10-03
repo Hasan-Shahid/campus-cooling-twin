@@ -1,0 +1,277 @@
+{
+  "block": "B",
+  "rooms": {
+    "14": {
+      "temp_sensors": [
+        335544685
+      ],
+      "hvac_units": [
+        335545219
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "15": {
+      "temp_sensors": [
+        335544692,
+        335547925,
+        335547926
+      ],
+      "hvac_units": [
+        335545213
+      ],
+      "presence_sensors": [
+        335544688
+      ],
+      "co2_sensors": [
+        335547927
+      ]
+    },
+    "16": {
+      "temp_sensors": [
+        335544699,
+        335548038
+      ],
+      "hvac_units": [
+        335545215
+      ],
+      "presence_sensors": [
+        335544705
+      ],
+      "co2_sensors": [
+        335547941
+      ]
+    },
+    "17": {
+      "temp_sensors": [
+        335544720,
+        335547950,
+        335547951
+      ],
+      "hvac_units": [
+        335545207
+      ],
+      "presence_sensors": [
+        335544712
+      ],
+      "co2_sensors": [
+        335547952
+      ]
+    },
+    "18": {
+      "temp_sensors": [
+        335544721,
+        335547965,
+        335547966,
+        335547967
+      ],
+      "hvac_units": [
+        335545209,
+        335545211
+      ],
+      "presence_sensors": [
+        335544713
+      ],
+      "co2_sensors": [
+        335547968,
+        335547968
+      ]
+    },
+    "84": {
+      "temp_sensors": [
+        335544823
+      ],
+      "hvac_units": [],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "9": {
+      "temp_sensors": [
+        335544830,
+        335547856,
+        335547861
+      ],
+      "hvac_units": [
+        335545203
+      ],
+      "presence_sensors": [
+        335544828
+      ],
+      "co2_sensors": [
+        335547862
+      ]
+    },
+    "10": {
+      "temp_sensors": [
+        335544838,
+        335547871,
+        335547879
+      ],
+      "hvac_units": [
+        335545205
+      ],
+      "presence_sensors": [
+        335545016
+      ],
+      "co2_sensors": [
+        335547876
+      ]
+    },
+    "11": {
+      "temp_sensors": [
+        335544857
+      ],
+      "hvac_units": [
+        335545201
+      ],
+      "presence_sensors": [
+        335544849
+      ],
+      "co2_sensors": [
+        335547888
+      ]
+    },
+    "12": {
+      "temp_sensors": [
+        335544858,
+        335545020,
+        335547901,
+        335547902,
+        335547903
+      ],
+      "hvac_units": [
+        335545197,
+        335545199
+      ],
+      "presence_sensors": [
+        335544850
+      ],
+      "co2_sensors": [
+        335547904,
+        335547904
+      ]
+    },
+    "85": {
+      "temp_sensors": [
+        335544863
+      ],
+      "hvac_units": [],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "2": {
+      "temp_sensors": [
+        335544977
+      ],
+      "hvac_units": [
+        335545143
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "86": {
+      "temp_sensors": [
+        335545055,
+        335545056
+      ],
+      "hvac_units": [],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "87": {
+      "temp_sensors": [
+        335545087
+      ],
+      "hvac_units": [],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "13": {
+      "temp_sensors": [
+        335545091
+      ],
+      "hvac_units": [
+        335545217
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "89": {
+      "temp_sensors": [
+        335547886,
+        335547887
+      ],
+      "hvac_units": [],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "90": {
+      "temp_sensors": [
+        335547940
+      ],
+      "hvac_units": [],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "1": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545147,
+        335545149
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "3": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545163,
+        335545165
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "4": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545161
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "5": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545155
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "6": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545153,
+        335545159
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "7": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545151
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    },
+    "8": {
+      "temp_sensors": [],
+      "hvac_units": [
+        335545157
+      ],
+      "presence_sensors": [],
+      "co2_sensors": []
+    }
+  },
+  "room_count": 24
+}
