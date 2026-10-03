@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+*.log
+.streamlit/secrets.toml
+# Raw dataset (~283 MB). The app only needs data/processed/, which is committed.
+Data_Nature/
+# Unrelated standalone demo
+Campus Cooling Twin*.html
