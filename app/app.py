@@ -179,6 +179,27 @@ def inject_css():
             .bgfx .scan, .bgfx .mote {{ display: none; }}
         }}
 
+        /* campus building tiles (inline SVG) */
+        .twin-map {{ width: 100%; height: auto; display: block; background: rgba(8,13,22,0.55); border: 1px solid {BORDER_GLOW}; border-radius: 4px; }}
+        .twin-map .road {{ stroke: rgba(91,184,255,0.22); stroke-width: 1; stroke-dasharray: 5 6; fill: none; }}
+        .twin-map .walk {{ font: 8px 'JetBrains Mono', monospace; fill: #5f7fa3; letter-spacing: .12em; }}
+        .twin-map .frame {{ fill: url(#tbp); stroke-width: 1.6; }}
+        .twin-map .glow {{ stroke-width: 4; opacity: .28; filter: blur(3px); }}
+        .twin-map .tb.crit .glow {{ animation: tb-pulse 1.6s ease-in-out infinite; }}
+        .twin-map .roof {{ fill: none; stroke-width: 1.4; opacity: .85; }}
+        .twin-map .led {{ fill: #35506f; }}
+        .twin-map .led.on {{ fill: #33e1ff; filter: drop-shadow(0 0 3px #33e1ff); animation: tb-blink 1.4s steps(2, end) infinite; }}
+        .twin-map text {{ font-family: 'JetBrains Mono', monospace; fill: #eaf4ff; pointer-events: none; }}
+        .twin-map .t1 {{ font-size: 13px; font-weight: 700; letter-spacing: .08em; }}
+        .twin-map .t2 {{ font-size: 9.5px; fill: #9db8d8; }}
+        .twin-map .t3 {{ font-size: 10px; font-weight: 700; letter-spacing: .1em; }}
+        .twin-map .t4 {{ font-size: 9px; fill: #7f9bbd; }}
+        .twin-map .hair {{ stroke: rgba(91,184,255,0.25); stroke-width: 1; }}
+        .twin-map .fl.pulse {{ animation: tb-pulse 1.2s ease-in-out infinite; }}
+        @keyframes tb-pulse {{ 50% {{ opacity: .35; }} }}
+        @keyframes tb-blink {{ 50% {{ opacity: .25; }} }}
+        @media (prefers-reduced-motion: reduce) {{ .twin-map * {{ animation: none !important; }} }}
+
         h1, h2, h3 {{ font-family: 'Rajdhani', system-ui, sans-serif; letter-spacing: 0.03em; text-transform: uppercase; font-weight: 700; }}
         h1 {{
             font-family: 'Orbitron', 'Rajdhani', sans-serif; font-weight: 800; color: #eaf4ff;
@@ -235,6 +256,44 @@ def inject_css():
     )
 
 
+def campus_svg(tiles):
+    """Futuristic building tiles as inline SVG, styled after the reference demo's building nodes:
+    chamfered status-coloured frame, rooftop HVAC unit with blinking LED, text block, and a
+    'floor stack' on the right (here six 4-hour blocks of the replay day; top = 20-24h)."""
+    colors = (STATUS["good"], STATUS["warning"], STATUS["critical"])
+    words = ("NORMAL", "LOW CONFIDENCE", "FLAGGED")
+    W, H, CW, X0, Y_TOP, Y_BOT = 150, 112, 162, 10, 30, 172
+    o = [
+        '<svg class="twin-map" viewBox="0 0 660 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Block B room status">',
+        '<defs><linearGradient id="tbp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#132238"/><stop offset="1" stop-color="#0a121e"/></linearGradient></defs>',
+        '<path class="road" d="M10,152 H650 M92,142 V162 M254,142 V162 M416,142 V162 M578,142 V162"/>',
+        '<text class="walk" x="330" y="148" text-anchor="middle">CENTRAL WALKWAY</text>',
+    ]
+    for t in tiles:
+        col, row = t["pos"]
+        x, y = X0 + col * CW, (Y_TOP if row == 1 else Y_BOT)
+        c, lvl = t["frame"], t["level"]
+        poly = f"{x+12},{y} {x+W},{y} {x+W},{y+H-12} {x+W-12},{y+H} {x},{y+H} {x},{y+12}"
+        hrs = "no alerts today" if t["hours"] == 0 else "%.1f h flagged today" % t["hours"]
+        o.append(f'<g class="tb{" crit" if lvl == 2 else ""}">')
+        o.append(f'<polygon class="glow" points="{poly}" style="stroke:{c};fill:none"/>')
+        o.append(f'<polygon class="frame" points="{poly}" style="stroke:{c}"/>')
+        # roof: antenna + HVAC unit with LED (blinks when the unit was on for most of the day)
+        o.append(f'<path class="roof" style="stroke:{c}" d="M{x+24},{y} V{y-12} M{x+W-52},{y} V{y-7} H{x+W-20} V{y}"/>')
+        o.append(f'<circle class="ant" cx="{x+24}" cy="{y-13}" r="2" style="fill:{c}"/>')
+        o.append(f'<circle class="led{" on" if t["hvac"] > 0.5 else ""}" cx="{x+W-36}" cy="{y-3.5}" r="1.8"/>')
+        o.append(f'<text class="t1" x="{x+14}" y="{y+24}">ROOM {t["room"]}</text>')
+        o.append(f'<text class="t2" x="{x+14}" y="{y+40}">{t["temp"]:.1f} °C · HVAC {t["hvac"]*100:.0f}%</text>')
+        o.append(f'<text class="t3" x="{x+14}" y="{y+64}" style="fill:{colors[lvl]}">{words[lvl]}</text>')
+        o.append(f'<text class="t4" x="{x+14}" y="{y+80}">{hrs}</text>')
+        o.append(f'<line class="hair" x1="{x+14}" y1="{y+92}" x2="{x+W-44}" y2="{y+92}"/>')
+        for i, b in enumerate(reversed(t["blocks"])):
+            o.append(f'<rect class="fl{" pulse" if b == 2 else ""}" x="{x+W-30}" y="{y+14+i*14}" width="16" height="10" rx="1" style="fill:{colors[b]};opacity:{1 if b else 0.4}"/>')
+        o.append('</g>')
+    o.append('</svg>')
+    return "".join(o)
+
+
 def inject_background():
     """Animated backdrop markup (styles live in inject_css). Motes use fixed pseudo-random
     positions/durations so the scene is identical on every rerun."""
@@ -278,28 +337,33 @@ st.caption(
 # programmatic jumps (play loop, preset buttons) which set st.session_state.day_idx
 # directly are reflected in the slider on rerun. Passing both `value=` and `key=`
 # would make Streamlit ignore the value on reruns, silently undoing those jumps.
+def _toggle_play():
+    # Callbacks run BEFORE the script reruns, so the button label below is always current
+    # (rendering the label first and flipping state after the click left "Pause" stuck on screen).
+    if not ss.playing and ss.day_idx >= N_DAYS - 1:
+        ss._pending_day_idx = 0  # Play from the last day restarts instead of stopping at once
+    ss.playing = not ss.playing
+
+
+def _pause():
+    ss.playing = False  # dragging the slider by hand takes over from the replay
+
+
 rc1, rc2, rc3, rc4 = st.columns([3, 1, 1, 1])
 with rc1:
-    st.slider("Replay date", 0, N_DAYS - 1, key="day_idx", format="")
+    st.slider("Replay date", 0, N_DAYS - 1, key="day_idx", format="", on_change=_pause)
 with rc2:
     st.markdown(f"**{day_of(ss.day_idx).strftime('%a %d %b %Y')}**")
 with rc3:
-    if st.button("Play" if not ss.playing else "Pause", key="play_btn"):
-        ss.playing = not ss.playing
+    st.button("Pause" if ss.playing else "Play", key="play_btn", on_click=_toggle_play)
 with rc4:
     preset_anom = temp_df.groupby("day")["any_anomaly"].sum().idxmax()
     if st.button("Jump to busiest anomaly day"):
         ss._pending_day_idx = DAYS.index(preset_anom)
         ss.playing = False
         st.rerun()
-
 if ss.playing:
-    if ss.day_idx < N_DAYS - 1:
-        time.sleep(0.25)
-        ss._pending_day_idx = ss.day_idx + 1
-        st.rerun()
-    else:
-        ss.playing = False
+    st.caption("Replay running -- the other tabs are paused so playback stays smooth. Press Pause to explore them.")
 
 day = day_of(ss.day_idx)
 day_mask_rooms = rooms_df["day"] <= day
@@ -345,35 +409,41 @@ with tab_overview:
         color_by = st.radio("Color by", ["Anomaly status (today)", "Avg. temperature (today)"], horizontal=True, key="ov_colorby")
         today_rooms = rooms_df.loc[day_only_rooms]
         today_anoms = temp_df.loc[day_only_temp]
-        fig_grid = go.Figure()
+        tmin, tmax = rooms_df["V2"].min(), rooms_df["V2"].max()
+        by_anoms = color_by.startswith("Anomaly")
+        tiles = []
         for room in FOCUS_ROOMS:
-            x, y = ROOM_GRID_POSITIONS[room]
             rrow = today_rooms[today_rooms["room"] == room]
             if rrow.empty:
                 continue
-            avg_temp = rrow["V2"].mean()
             tr = today_anoms[today_anoms["room"] == room]
-            has_setpoint_or_resid = bool((tr["anomaly_setpoint_gap"] | tr["anomaly_temp_residual"]).any()) if not tr.empty else False
-            has_occ_only = bool(tr["anomaly_hvac_no_occupancy"].any()) if not tr.empty else False
-            if color_by.startswith("Anomaly"):
-                color = STATUS["critical"] if has_setpoint_or_resid else (STATUS["warning"] if has_occ_only else STATUS["good"])
-                label = "FLAGGED" if (has_setpoint_or_resid or has_occ_only) else "normal"
+            blocks = [0] * 6  # six 4-hour blocks of the day (0 = 00-04h ... 5 = 20-24h) -> the building's "floor stack"
+            if not tr.empty:
+                crit = (tr["anomaly_setpoint_gap"] | tr["anomaly_temp_residual"]).to_numpy()
+                warn = tr["anomaly_hvac_no_occupancy"].to_numpy()
+                blk = (tr["Date"].dt.hour // 4).to_numpy()
+                blocks = [2 if crit[blk == k].any() else (1 if warn[blk == k].any() else 0) for k in range(6)]
+            level = max(blocks)
+            avg_temp = float(rrow["V2"].mean())
+            if by_anoms:
+                frame = (STATUS["good"], STATUS["warning"], STATUS["critical"])[level]
             else:
-                tmin, tmax = rooms_df["V2"].min(), rooms_df["V2"].max()
                 frac = (avg_temp - tmin) / (tmax - tmin)
-                color = SEQUENTIAL_BLUE[min(int(frac * (len(SEQUENTIAL_BLUE) - 1)), len(SEQUENTIAL_BLUE) - 1)]
-                label = f"{avg_temp:.1f} C"
-            fig_grid.add_shape(type="rect", x0=x, x1=x + 0.9, y0=y, y1=y + 0.9, fillcolor=color, line=dict(color=NEON_CYAN_BRIGHT, width=1.5))
-            fig_grid.add_annotation(x=x + 0.45, y=y + 0.45, text=f"ROOM {room}<br>{label}", showarrow=False, font=dict(color="#ffffff", size=12, family="JetBrains Mono, monospace"))
-        fig_grid.update_xaxes(visible=False, range=[-0.2, 4.1])
-        fig_grid.update_yaxes(visible=False, range=[-0.2, 2.1])
-        fig_grid.update_layout(height=300, margin=dict(l=10, r=10, t=10, b=10), plot_bgcolor="#0d141f", paper_bgcolor="#0d141f")
-        st.plotly_chart(fig_grid, width="stretch")
+                frame = SEQUENTIAL_BLUE[min(int(frac * (len(SEQUENTIAL_BLUE) - 1)), len(SEQUENTIAL_BLUE) - 1)]
+            tiles.append(dict(
+                room=room, pos=ROOM_GRID_POSITIONS[room], frame=frame, level=level, blocks=blocks, temp=avg_temp,
+                hvac=float((rrow["V4"] > 0).mean()), hours=float(tr["any_anomaly"].sum()) * 10 / 60 if not tr.empty else 0.0,
+            ))
+        st.markdown(campus_svg(tiles), unsafe_allow_html=True)
         st.markdown(
             f"<span style='color:{STATUS['good']}'>&#9679;</span> normal &nbsp; "
             f"<span style='color:{STATUS['warning']}'>&#9679;</span> HVAC on, no motion and no CO2 rise (low confidence) &nbsp; "
             f"<span style='color:{STATUS['critical']}'>&#9679;</span> setpoint gap or unexpected temp",
             unsafe_allow_html=True,
+        )
+        st.caption(
+            "Side stack on each building = six 4-hour blocks of the replay day (top = 20:00-24:00, bottom = 00:00-04:00), "
+            "coloured by the worst anomaly in that block. The rooftop light blinks when the HVAC unit ran for over half the day."
         )
 
     with col_feed:
@@ -389,6 +459,17 @@ with tab_overview:
                 if st.button(f"Room {room} -- {ty.get('name', 'flagged')} ({hours_flagged:.1f} h)", key=f"feed_{room}"):
                     ss.jump_room = room
                     ss.jump_day = day
+
+# ---- replay loop ----
+# Placed right after the Overview tab on purpose: while playing, each tick reruns the script only up to
+# here (Overview = the only thing that animates) and skips building the Plotly-heavy tabs below.
+if ss.playing:
+    if ss.day_idx < N_DAYS - 1:
+        time.sleep(0.12)
+        ss._pending_day_idx = ss.day_idx + 1
+    else:
+        ss.playing = False  # reached the end: rerun once more to draw the full page
+    st.rerun()
 
 # ======================================================= ROOMS & DIAGNOSIS =
 with tab_rooms:
